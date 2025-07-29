@@ -1,4 +1,4 @@
-
+`
 # Análise Detalhada do Arquivo `azazel.c` do Rootkit Azazel
 
 Este documento contém uma análise completa do código-fonte `util.c` do projeto Azazel. O foco é explicar o que cada parte do código faz, por que foi implementada dessa forma e referências para aprofundamento.
@@ -140,6 +140,142 @@ s[strcspn(s, "
 #### O que faz:
 Sobrescreve os argumentos do processo na memória, útil para esconder comandos no processo.
 
+
+
+
+
+
+---
+
+
+# Guia para Desenvolvimento de Rootkit Userland em Linux (Tipo Azazel)
+
+---
+
+## Introdução
+
+Este guia cobre os conceitos, técnicas e documentações necessárias para desenvolver um rootkit userland em Linux semelhante ao código Azazel, que intercepta syscalls, esconde arquivos/processos, implementa backdoor shell e técnicas anti-debug.
+
+---
+
+## 1. Hooking Dinâmico de Funções com LD_PRELOAD e dlsym
+
+### Conceito
+
+- Usar LD_PRELOAD para carregar uma biblioteca `.so` que sobrescreve funções libc.
+- Chamar a função original com `dlsym(RTLD_NEXT, "funcao")` para evitar loop infinito.
+- Interceptar chamadas para `open()`, `stat()`, `readdir()`, `accept()` e outras.
+
+### Referências
+
+- [man dlsym](https://man7.org/linux/man-pages/man3/dlsym.3.html)  
+- [Tutorial LD_PRELOAD para Rootkits](https://null-byte.wonderhowto.com/how-to/hide-files-processes-linux-rootkit-using-ldpreload-0181779/)  
+- [Blog Quarkslab: Hooking Linux Userland](https://blog.quarkslab.com/hooking-on-linux-part-1.html)
+
+---
+
+## 2. Syscalls Linux e Manipulação
+
+### Conceitos
+
+- Syscalls como `open()`, `stat()`, `access()`, `accept()`, `fork()`, `execve()` são alvo para esconder atividades.
+- Entender como chamar syscalls originais dentro do hook para preservar funcionamento.
+
+### Referências
+
+- [Linux Syscall Table](https://filippo.io/linux-syscall-table/)  
+- [man pages para syscalls (open, stat, access, accept)](https://man7.org/linux/man-pages/dir_section_2.html)  
+- [Interceptando syscalls em C](https://www.ibm.com/docs/en/aix/7.2?topic=programs-intercepting-system-calls)
+
+---
+
+## 3. Manipulação de Terminais e PTYs
+
+### Conceitos
+
+- Criar pseudoterminais para shell interativo remoto (`openpty()`, `ioctl()`).
+- Redirecionar entrada e saída do shell para socket remoto.
+- Configurar sessão para shell usando `setsid()`, `dup2()`, `execve()`.
+
+### Referências
+
+- [openpty(3) manual](https://man7.org/linux/man-pages/man3/openpty.3.html)  
+- [Artigo sobre Pseudo-terminals](https://www.linuxjournal.com/article/6420)  
+- *Advanced Programming in the UNIX Environment* - Stevens (capítulo de terminal control)
+
+---
+
+## 4. Estruturas utmp e wtmp (Logs de Login)
+
+### Conceitos
+
+- Arquivos `/var/run/utmp`, `/var/log/wtmp` registram sessões e logins.
+- Rootkit pode apagar entradas para esconder sessões.
+- Uso da struct `utmp` e funções de leitura/escrita para manipular.
+
+### Referências
+
+- [man utmp(5)](https://man7.org/linux/man-pages/man5/utmp.5.html)  
+- [Explicação sobre utmp/wtmp](https://unix.stackexchange.com/questions/10340/what-do-utmp-wtmp-and-btmp-logs-contain)  
+- [Remoção de rastros de login](https://blog.rchapman.org/posts/Linux_System_Log_Files/)
+
+---
+
+## 5. Programação de Sockets e Multiplexação
+
+### Conceitos
+
+- Aceitar conexões TCP e criar shells interativos.
+- Multiplexar I/O entre socket e pty com `select()`.
+- Implementar autenticação simples para backdoor.
+
+### Referências
+
+- [Linux TCP/IP socket programming HOWTO](https://www.tldp.org/HOWTO/html_single/TCP-IP-Programming-HOWTO/)  
+- [man select(2)](https://man7.org/linux/man-pages/man2/select.2.html)  
+- [Beej’s Guide to Network Programming](http://beej.us/guide/bgnet/)
+
+---
+
+## 6. Técnicas Anti-Debug e Evasão
+
+### Conceitos
+
+- Bloquear chamadas `ptrace()` para impedir attach de debuggers.
+- Evitar rastreamento por `ldd`, `ld-linux` e variáveis de ambiente de tracing.
+
+### Referências
+
+- [Anti-debugging no Linux](https://blog.filippo.io/the-boring-debugger/)  
+- Técnicas de evasão para rootkits userland (diversos blogs de segurança)
+
+---
+
+## 7. Criptografia Simples e Backdoors
+
+### Conceitos
+
+- Uso de XOR simples para criptografar dados no canal do shell.
+- Autenticação por senha simples na conexão.
+- Implementação de shell reverso com PTY.
+
+### Referências
+
+- [XOR Encryption em C](https://www.geeksforgeeks.org/simple-xor-encryption-in-c-cpp/)  
+- [Netcat/Ncat backdoors e shells](https://nmap.org/ncat/guide/)  
+- [Criando um reverse shell com pty](https://medium.com/@varunon9/creating-a-linux-reverse-shell-with-pty-5089b5a36b3e)
+
+---
+
+## 8. Construção e Testes
+
+### Dicas
+
+- Compile a biblioteca compartilhada com:  
+  ```bash
+  gcc -shared -fPIC -o azazel.so azazel.c -ldl
+
+
 ```c
 memset(argv[i], 0, strlen(argv[i]));
 ```
@@ -162,3 +298,4 @@ memset(argv[i], 0, strlen(argv[i]));
 ---
 
 *Análise gerada automaticamente para fins educacionais.*
+`
