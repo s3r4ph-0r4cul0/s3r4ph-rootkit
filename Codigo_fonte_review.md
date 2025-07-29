@@ -1,5 +1,5 @@
 
-# Análise Detalhada do Arquivo `util.c` do Rootkit Azazel
+# Análise Detalhada do Arquivo `azazel.c` do Rootkit Azazel
 
 Este documento contém uma análise completa do código-fonte `util.c` do projeto Azazel. O foco é explicar o que cada parte do código faz, por que foi implementada dessa forma e referências para aprofundamento.
 
