@@ -2,13 +2,13 @@
 **�� PRIORIDADE CRÍTICA (Análise Imediata)**
 
 1. azazel.c (19KB, 821 linhas)
-Por que primeiro: Arquivo principal do rootkit
+- Por que primeiro: Arquivo principal do rootkit
 O que analisar:
-Função azazel_init() - inicialização
-Hooks de system calls (open, stat, readdir, etc.)
-Função is_invisible() - lógica de ocultação
-Função drop_shell() - backdoor principal
-Função clean_utmp/clean_wtmp() - limpeza de logs
+  - Função azazel_init() - inicialização
+  - Hooks de system calls (open, stat, readdir, etc.)
+  - Função is_invisible() - lógica de ocultação
+  - Função drop_shell() - backdoor principal
+  - Função clean_utmp/clean_wtmp() - limpeza de logs
 
 ---
 
